@@ -39,15 +39,24 @@ NUMBER_ATOM = (
     r")"
 )
 
-AMOUNT_RE = re.compile(
-    # Greedy ingredient-name capture intentionally chooses the LAST valid
-    # quantity token.  This preserves product names containing digits, e.g.
-    # A1醬 1大匙 / 8吋戚風蛋糕 1個, instead of misreading the digit in the
-    # ingredient name as the recipe quantity.
-    rf"^(?P<name>.*)\s*(?:約\s*)?"
+# Quantity parsing is split into two patterns instead of one greedy regex.
+# This prevents a value such as ``300公克`` from being misread as ingredient
+# name ``...30`` + quantity ``0g`` while still preserving product names such
+# as ``A1醬`` and ``8吋戚風蛋糕``.
+AMOUNT_WITH_UNIT_RE = re.compile(
+    rf"(?<![\d./])(?:約\s*)?"
     rf"(?P<qty1>{NUMBER_ATOM})"
     rf"(?:\s*(?P<range_sep>~|-)\s*(?P<qty2>{NUMBER_ATOM}))?"
-    rf"\s*(?P<unit>{UNIT_PATTERN})?(?P<trailing>.*)$"
+    rf"\s*(?P<unit>{UNIT_PATTERN})"
+)
+
+# Unit-less quantities are accepted only at the end of the line and must be
+# separated from the ingredient name.  This avoids interpreting the ``1`` in
+# ``A1醬`` as recipe quantity.
+AMOUNT_NO_UNIT_RE = re.compile(
+    rf"\s+(?:約\s*)?"
+    rf"(?P<qty1>{NUMBER_ATOM})"
+    rf"(?:\s*(?P<range_sep>~|-)\s*(?P<qty2>{NUMBER_ATOM}))?\s*$"
 )
 
 QUALITATIVE_SUFFIX_RE = re.compile(
@@ -82,31 +91,47 @@ def parse_material_line(clean_raw: str) -> dict:
     if qualitative_match:
         raw_name = clean_text(qualitative_match.group("name"))
         qualitative_unit = qualitative_match.group("qual")
-        return {
-            "raw_name": raw_name,
-            "canonical_name": canonicalize_ingredient_name(raw_name),
-            "quantity_min": None,
-            "quantity_max": None,
-            "quantity_value": None,
-            "unit": qualitative_unit,
-            "weight_g": None,
-            "is_estimated": True,
-        }
+        # Corrupted rows can contain only ``適量``/``少許`` with no ingredient
+        # name.  Do not create an empty ingredient key; keep the full raw token
+        # unresolved so the row remains reviewable without contaminating the
+        # ingredient master.
+        if raw_name:
+            return {
+                "raw_name": raw_name,
+                "canonical_name": canonicalize_ingredient_name(raw_name),
+                "quantity_min": None,
+                "quantity_max": None,
+                "quantity_value": None,
+                "unit": qualitative_unit,
+                "weight_g": None,
+                "is_estimated": True,
+            }
 
-    amount_match = AMOUNT_RE.match(source)
+    # Prefer quantities accompanied by a recognized unit.  There can be digits
+    # inside an ingredient/product name, so scan all candidates and use the last
+    # valid unit-bearing amount rather than relying on a greedy name capture.
+    amount_matches = list(AMOUNT_WITH_UNIT_RE.finditer(source))
+    amount_match = amount_matches[-1] if amount_matches else None
+    unit = ""
+
+    if amount_match is None:
+        # Conservative fallback for a trailing, unit-less quantity.
+        amount_match = AMOUNT_NO_UNIT_RE.search(source)
+    else:
+        unit = normalize_unit(amount_match.group("unit") or "")
+
     if amount_match:
-        raw_name = clean_text(amount_match.group("name"))
+        raw_name = clean_text(source[: amount_match.start()])
         qty1 = parse_number(amount_match.group("qty1"))
         qty2 = parse_number(amount_match.group("qty2") or "")
-        unit = normalize_unit(amount_match.group("unit") or "")
-        trailing = clean_text(amount_match.group("trailing") or "")
 
-        # Only accept a numeric token as a quantity when it has a recognized
-        # unit, or when no product/model text remains after it.
-        if unit or not trailing:
+        # A zero/negative quantity is almost always source corruption (for
+        # example ``00公克`` or malformed ``4公0克``).  Leave it unresolved
+        # instead of writing a misleading 0g value into coverage calculations.
+        if raw_name and qty1 is not None and qty1 > 0:
             quantity_min = qty1
             quantity_max = qty2 if qty2 is not None else qty1
-            if qty1 is not None and qty2 is not None:
+            if qty2 is not None:
                 quantity_value = (qty1 + qty2) / 2
                 estimated = True
             else:

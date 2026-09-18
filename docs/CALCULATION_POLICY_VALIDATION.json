@@ -1,0 +1,206 @@
+{
+  "project": "recipe_gcp_docker_compose_CALCULATION_POLICY_FIX_FULL",
+  "validation_date": "2026-09-19",
+  "scope": "static/offline validation; Docker/MySQL runtime unavailable in this execution environment",
+  "pass_count": 21,
+  "fail_count": 0,
+  "docker_runtime_tested": false,
+  "corpus_policy_stats": {
+    "recipe_rows": 29597,
+    "ingredient_lines": 257537,
+    "unique_ingredient_names": 13765,
+    "matched_unique_names": 1873,
+    "matched_policy_lines": 134643,
+    "seasoning_price_excluded_lines": 122263,
+    "zero_cost_nonseasoning_lines": 12380,
+    "top_rules": [
+      [
+        "sugars_and_sweeteners",
+        17097
+      ],
+      [
+        "cooking_oils_and_fats",
+        16794
+      ],
+      [
+        "salt",
+        15567
+      ],
+      [
+        "pepper_and_dry_spices",
+        13926
+      ],
+      [
+        "water_and_ice",
+        12380
+      ],
+      [
+        "cooking_alcohol",
+        9186
+      ],
+      [
+        "soy_sauce",
+        8031
+      ],
+      [
+        "aromatic_garlic",
+        7363
+      ],
+      [
+        "aromatic_scallion",
+        6913
+      ],
+      [
+        "aromatic_ginger",
+        6683
+      ],
+      [
+        "high_energy_sauces",
+        4862
+      ],
+      [
+        "culinary_herbs",
+        2925
+      ],
+      [
+        "seasoning_powders",
+        2881
+      ],
+      [
+        "vinegar",
+        2596
+      ],
+      [
+        "generic_condiment_sauce",
+        2451
+      ],
+      [
+        "aromatic_chili",
+        1749
+      ],
+      [
+        "fish_sauce_and_mirin",
+        1606
+      ],
+      [
+        "leavening_processing_aids",
+        1023
+      ],
+      [
+        "msg",
+        527
+      ],
+      [
+        "mustard_plain",
+        83
+      ]
+    ]
+  },
+  "results": [
+    {
+      "check": "python_compile_all",
+      "status": "PASS",
+      "detail": "43 files; errors=[]"
+    },
+    {
+      "check": "shell_syntax",
+      "status": "PASS",
+      "detail": "6 files; errors=[]"
+    },
+    {
+      "check": "docker_compose_yaml",
+      "status": "PASS",
+      "detail": "services=18"
+    },
+    {
+      "check": "compose_local_paths",
+      "status": "PASS",
+      "detail": "missing=[]"
+    },
+    {
+      "check": "json_parse_all",
+      "status": "PASS",
+      "detail": "errors=[]"
+    },
+    {
+      "check": "policy_rule_load",
+      "status": "PASS",
+      "detail": "rules=20"
+    },
+    {
+      "check": "policy_classification_cases",
+      "status": "PASS",
+      "detail": "16 cases; failures=[]"
+    },
+    {
+      "check": "all_seasonings_price_excluded",
+      "status": "PASS",
+      "detail": "violations=[]"
+    },
+    {
+      "check": "conditional_rules_have_threshold_and_fallback",
+      "status": "PASS",
+      "detail": "violations=[]"
+    },
+    {
+      "check": "schema_contains_policy",
+      "status": "PASS",
+      "detail": "required schema tokens"
+    },
+    {
+      "check": "migration_011_contains_policy",
+      "status": "PASS",
+      "detail": "required migration tokens"
+    },
+    {
+      "check": "04a_imports_policy_rules",
+      "status": "PASS",
+      "detail": "policy rebuild integrated"
+    },
+    {
+      "check": "09_policy_aware_calculation",
+      "status": "PASS",
+      "detail": "policy-aware calculation tokens"
+    },
+    {
+      "check": "09_line_sql_placeholder_count",
+      "status": "PASS",
+      "detail": "count=1"
+    },
+    {
+      "check": "09_fake_db_control_flow_and_params",
+      "status": "PASS",
+      "detail": "main completed with fake DB; placeholder counts valid"
+    },
+    {
+      "check": "api_price_scope_metadata",
+      "status": "PASS",
+      "detail": "API metadata"
+    },
+    {
+      "check": "hermes_price_scope_metadata",
+      "status": "PASS",
+      "detail": "recommendation metadata"
+    },
+    {
+      "check": "raw_corpus_policy_scan",
+      "status": "PASS",
+      "detail": "{\"recipe_rows\": 29597, \"ingredient_lines\": 257537, \"unique_ingredient_names\": 13765, \"matched_unique_names\": 1873, \"matched_policy_lines\": 134643, \"seasoning_price_excluded_lines\": 122263, \"zero_cost_nonseasoning_lines\": 12380, \"top_rules\": [[\"sugars_and_sweeteners\", 17097], [\"cooking_oils_and_fats\", 16794], [\"salt\", 15567], [\"pepper_and_dry_spices\", 13926], [\"water_and_ice\", 12380], [\"cooking_alcohol\", 9186], [\"soy_sauce\", 8031], [\"aromatic_garlic\", 7363], [\"aromatic_scallion\", 6913], [\"aromatic_ginger\", 6683], [\"high_energy_sauces\", 4862], [\"culinary_herbs\", 2925], [\"seasoning_powders\", 2881], [\"vinegar\", 2596], [\"generic_condiment_sauce\", 2451], [\"aromatic_chili\", 1749], [\"fish_sauce_and_mirin\", 1606], [\"leavening_processing_aids\", 1023], [\"msg\", 527], [\"mustard_plain\", 83]]}"
+    },
+    {
+      "check": "normalization_regression",
+      "status": "PASS",
+      "detail": "failures=[]"
+    },
+    {
+      "check": "er_model_updated",
+      "status": "PASS",
+      "detail": "ER model updated"
+    },
+    {
+      "check": "production_architecture_preserved",
+      "status": "PASS",
+      "detail": "18 production services retained"
+    }
+  ]
+}

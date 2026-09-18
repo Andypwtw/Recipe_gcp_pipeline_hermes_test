@@ -205,7 +205,9 @@ def recommend_recipes(
             ROUND(rns.coverage_percent, 2) AS calorie_coverage_percent,
             ROUND(rns.price_coverage_percent, 2) AS price_coverage_percent,
             rns.calorie_status,
-            rns.price_status
+            rns.price_status,
+            'MAIN_INGREDIENTS_ONLY' AS price_scope,
+            '不含調味料' AS price_note
         FROM recipes r
         {' '.join(joins)}
         WHERE {where_sql}
@@ -280,7 +282,9 @@ def recommend_recipes_page(
             ROUND(rns.coverage_percent, 2) AS calorie_coverage_percent,
             ROUND(rns.price_coverage_percent, 2) AS price_coverage_percent,
             rns.calorie_status,
-            rns.price_status
+            rns.price_status,
+            'MAIN_INGREDIENTS_ONLY' AS price_scope,
+            '不含調味料' AS price_note
         FROM recipes r
         {' '.join(joins)}
         WHERE {where_sql}
