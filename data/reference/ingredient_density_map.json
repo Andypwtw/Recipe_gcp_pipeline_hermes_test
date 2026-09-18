@@ -19,16 +19,207 @@
     "ingredient": "醬油",
     "density_g_ml": 1.16,
     "density_type": "liquid",
+    "confidence": "HIGH",
     "status": "ACTIVE",
-    "source": "default",
-    "note": ""
+    "source": "project_existing_default",
+    "note": "Preserved from base project density map."
   },
   {
     "ingredient": "橄欖油",
     "density_g_ml": 0.91,
     "density_type": "liquid",
+    "confidence": "HIGH",
     "status": "ACTIVE",
-    "source": "default",
-    "note": ""
+    "source": "project_existing_default",
+    "note": "Preserved from base project density map."
+  },
+  {
+    "ingredient": "鹽",
+    "density_g_ml": 1.2,
+    "density_type": "bulk",
+    "confidence": "HIGH",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=95. USDA 1 tsp=6g；少許採約1/8小匙。"
+  },
+  {
+    "ingredient": "鹽巴",
+    "density_g_ml": 1.2,
+    "density_type": "bulk",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=89. 鹽的口語別名。"
+  },
+  {
+    "ingredient": "胡椒粉",
+    "density_g_ml": 0.47,
+    "density_type": "bulk",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=89. 以黑/白胡椒粉 household weight 中值近似。"
+  },
+  {
+    "ingredient": "白胡椒粉",
+    "density_g_ml": 0.48,
+    "density_type": "bulk",
+    "confidence": "HIGH",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=94. USDA 1 tsp=2.4g。"
+  },
+  {
+    "ingredient": "白胡椒",
+    "density_g_ml": 0.48,
+    "density_type": "bulk",
+    "confidence": "HIGH",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=90. 未標粒狀時按白胡椒粉。"
+  },
+  {
+    "ingredient": "黑胡椒粉",
+    "density_g_ml": 0.46,
+    "density_type": "bulk",
+    "confidence": "HIGH",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=91. USDA 1 tsp=2.3g。"
+  },
+  {
+    "ingredient": "黑胡椒",
+    "density_g_ml": 0.46,
+    "density_type": "bulk",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=87. 未標粒狀時按研磨黑胡椒。"
+  },
+  {
+    "ingredient": "黑胡椒粒",
+    "density_g_ml": 0.58,
+    "density_type": "bulk",
+    "confidence": "HIGH",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=91. USDA 1 tsp=2.9g。"
+  },
+  {
+    "ingredient": "胡椒",
+    "density_g_ml": 0.47,
+    "density_type": "bulk",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=85. 未標黑/白時採通用值。"
+  },
+  {
+    "ingredient": "香油",
+    "density_g_ml": 0.908,
+    "density_type": "liquid",
+    "confidence": "HIGH",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=91. 芝麻油約4.54g/tsp。"
+  },
+  {
+    "ingredient": "麻油",
+    "density_g_ml": 0.908,
+    "density_type": "liquid",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=85. 以芝麻油 household conversion 估算。"
+  },
+  {
+    "ingredient": "糖",
+    "density_g_ml": 0.84,
+    "density_type": "bulk",
+    "confidence": "HIGH",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=93. 未標糖種時按砂糖重量估算。"
+  },
+  {
+    "ingredient": "細砂糖",
+    "density_g_ml": 0.84,
+    "density_type": "bulk",
+    "confidence": "HIGH",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=91. USDA 砂糖1 tsp=4.2g。"
+  },
+  {
+    "ingredient": "砂糖",
+    "density_g_ml": 0.84,
+    "density_type": "bulk",
+    "confidence": "HIGH",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=90. USDA 砂糖1 tsp=4.2g。"
+  },
+  {
+    "ingredient": "沙拉油",
+    "density_g_ml": 0.908,
+    "density_type": "liquid",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=86. 植物油約4.54g/tsp。"
+  },
+  {
+    "ingredient": "烏醋",
+    "density_g_ml": 0.996,
+    "density_type": "liquid",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=82. 以一般醋密度近似。"
+  },
+  {
+    "ingredient": "白醋",
+    "density_g_ml": 0.996,
+    "density_type": "liquid",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=86. 一般醋約4.98g/tsp。"
+  },
+  {
+    "ingredient": "醋",
+    "density_g_ml": 0.996,
+    "density_type": "liquid",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=84. 未標醋種時採一般醋近似。"
+  },
+  {
+    "ingredient": "味精",
+    "density_g_ml": 0.8,
+    "density_type": "bulk",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=82. MSG約4g/tsp。"
+  },
+  {
+    "ingredient": "白芝麻",
+    "density_g_ml": 0.6,
+    "density_type": "bulk",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=88. USDA 芝麻1 tbsp=9g。"
+  },
+  {
+    "ingredient": "熟白芝麻",
+    "density_g_ml": 0.6,
+    "density_type": "bulk",
+    "confidence": "MEDIUM",
+    "status": "ACTIVE",
+    "source": "qualitative_amount_rules_high_confidence",
+    "note": "Derived from household tsp weight; confidence_score=84. 烘焙後仍以芝麻 household weight 估算。"
   }
 ]

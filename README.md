@@ -1,131 +1,150 @@
-# Recipe Collections V11-T-2
+# Recipe_gcp_pipeline_hermes_test — Normalization & Coverage Fix
 
-V11-T-2 是 **V11 正式版的第二個測試版本**，用來驗證新增「每 100g 價格 → 食譜預估價格 → API / Hermes 顯示」功能。
+這份測試專案以使用者上傳的 `Recipe_gcp_pipeline_hermes_test.zip` 為基礎，重點修正：
 
-本版本只供測試，不取代 V11，也不列入正式版版本演進。
+1. 食材名稱正規化不足，造成 Nutrition Matching 失敗。
+2. `weight_g` 覆蓋率不足，造成熱量與價格大量 `INSUFFICIENT`。
+3. 將高信心 `少許` 比對表正式納入 MySQL 與重量估算流程。
+4. 熱量與價格 coverage 改為「重量型 coverage」，避免少量調味料與主要食材權重相同。
+5. 保留安全門檻，不以降低門檻方式製造假精準結果。
 
 ## 測試架構
 
 ```text
 已爬取 JSON
 ↓
-資料清洗 / 正規化
+01/02 清洗
 ↓
-MySQL
+03a 建立 count-unit 候選重量表
 ↓
-營養 / 重量 / Matching
+03 食材名稱 / 單位正規化
 ↓
-熱量 + 預估價格
+04 匯入 MySQL
 ↓
-Flask API
+04a 匯入重量 / 密度 / qualitative rules
 ↓
-Hermes API
+04b 補 weight_g
+↓
+05 匯入 Nutrition + 每100g價格
+↓
+06 Nutrition Matching
+↓
+07 自動審核
+↓
+08 套用審核結果
+↓
+09 熱量 + 價格（重量型 coverage）
+↓
+Flask API / Hermes
 ```
 
-## 不包含
+## 高信心 qualitative rules
 
-Crawler、Proxy、Kafka、Redpanda、MongoDB、Mongo Writer、Airflow、PostgreSQL、GCP production networking、Web frontend。
-
-## 價格資料來源
-
-`data/reference/food_nutrition_2025.xlsx`
-
-新增欄位：
+專案已包含：
 
 ```text
-每100g的價格
+data/reference/qualitative_amount_rules_high_confidence.xlsx
+data/reference/qualitative_amount_rules.json
 ```
 
-單位定義：**新台幣 / 100g**。
-
-匯入後寫入：
+目前 JSON 只啟用 `少許` 的高信心規則，且：
 
 ```text
-nutrition_source.price_per_100g
+confidence_score >= 80
+auto_convert = true
 ```
 
-食譜價格公式：
+`適量` 不會被任意指定固定克數；沒有高信心規則時維持 `weight_g = NULL`。
+
+## Coverage 新算法
+
+### 熱量
 
 ```text
-食材預估價格 = weight_g × price_per_100g ÷ 100
+有熱量資料的已知重量
+÷
+全部已知重量
 ```
 
-最後寫入：
+必須同時符合：
 
 ```text
-recipe_nutrition_summary.estimated_price
-recipe_nutrition_summary.price_coverage_percent
-recipe_nutrition_summary.price_status
+calorie weight coverage >= 60%
+known-weight line coverage >= 50%
 ```
 
-`price_status`：
+### 價格
 
-- `CALCULATED`：價格覆蓋率 100%
-- `PARTIAL`：價格覆蓋率 >= 60% 且 < 100%
-- `INSUFFICIENT`：價格覆蓋率 < 60% 或無可計算價格
+```text
+有價格資料的可計價重量
+÷
+全部可計價已知重量
+```
+
+水 / 冰等不列入價格 coverage denominator。
 
 ## 第一次啟動
-
-V11-T-2 提供測試專用非空預設密碼，所以即使沒有 `.env` 也可以啟動：
-
-```bash
-docker compose up -d --build
-```
-
-建議仍使用：
 
 ```bash
 cp .env.example .env
 docker compose up -d --build
 ```
 
-如果之前同名測試 MySQL Volume 已用舊 Schema 建立，請先清除測試 Volume：
+預設：
+
+```text
+MySQL Host: 127.0.0.1:3319
+Flask API:  http://127.0.0.1:5001
+```
+
+若舊測試 volume 的 schema 需要完全重建，而且資料可以刪除：
 
 ```bash
 docker compose down -v
 docker compose up -d --build
 ```
 
-## 執行完整測試 Pipeline
+注意：`down -v` 只應用在這份可重建的測試環境，不要拿去正式資料庫環境執行。
+
+## 執行完整 Pipeline
 
 ```bash
 docker compose exec python-test \
   uv run python scripts/10_pipeline.py
 ```
 
-## API
-
-Health：
+## API 健康檢查
 
 ```bash
-curl http://localhost:5001/health
+curl http://127.0.0.1:5001/health
 ```
 
-食譜詳細資料：
+Hermes：
 
-```bash
-curl http://localhost:5001/api/v1/recipes/<SEQ>
+```text
+POST /api/v1/hermes/recommend
 ```
 
-價格功能加入後，API 可包含：
+## Pipeline 完成後檢查成功率
 
-```json
-{
-  "energy_kcal": 520,
-  "estimated_price": 135.50,
-  "calorie_coverage_percent": 95.0,
-  "price_coverage_percent": 80.0,
-  "calorie_status": "CALCULATED",
-  "price_status": "PARTIAL"
-}
+```sql
+SELECT calorie_status, COUNT(*)
+FROM recipe_nutrition_summary
+GROUP BY calorie_status;
+
+SELECT price_status, COUNT(*)
+FROM recipe_nutrition_summary
+GROUP BY price_status;
+
+SELECT
+  ROUND(AVG(coverage_percent),2) AS avg_calorie_weight_coverage,
+  ROUND(AVG(price_coverage_percent),2) AS avg_price_weight_coverage,
+  ROUND(AVG(weight_coverage_percent),2) AS avg_known_weight_line_coverage
+FROM recipe_nutrition_summary;
 ```
 
-## 預設連線
+## 驗證限制
 
-- Flask API：`localhost:5001`
-- MySQL Host：`127.0.0.1:3318`
-- Docker 內 MySQL：`mysql-test:3306`
+已做 Python syntax、Compose YAML、JSON、正規化離線測試與 SQL 結構靜態檢查。
 
-## 原始食譜測試資料
-
-`data/raw/ytower_seq_recipes.json`
+目前工作環境沒有 Docker daemon / MySQL runtime，因此沒有宣稱完成實際 Docker + MySQL E2E。最終的 CALCULATED / PARTIAL / INSUFFICIENT 數量，必須在 GCP 跑完整 pipeline 後確認。
