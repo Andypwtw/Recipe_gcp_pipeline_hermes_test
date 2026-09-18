@@ -1,0 +1,65 @@
+services:
+  mysql-test:
+    image: mysql:8.4
+    container_name: recipe-v11t2-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-v11t2_root_test_2026}
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-recipe_ai}
+      MYSQL_USER: ${MYSQL_USER:-recipe_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-v11t2_app_test_2026}
+      TZ: ${TZ:-Asia/Taipei}
+    ports:
+      - "127.0.0.1:${MYSQL_TEST_PORT:-3318}:3306"
+    volumes:
+      - recipe-v11t2-mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    networks:
+      - recipe-v11t2-net
+
+  python-test:
+    build:
+      context: ./python
+      dockerfile: Dockerfile
+    container_name: recipe-v11t2-python
+    restart: unless-stopped
+    depends_on:
+      mysql-test:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql-test
+      DB_PORT: "3306"
+      DB_NAME: ${MYSQL_DATABASE:-recipe_ai}
+      DB_USER: ${MYSQL_USER:-recipe_app}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-v11t2_app_test_2026}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-recipe_ai}
+      MYSQL_USER: ${MYSQL_USER:-recipe_app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-v11t2_app_test_2026}
+      HERMES_API_KEY: ${HERMES_API_KEY:-}
+      PYTHONPATH: /workspace/python
+      UV_PROJECT_ENVIRONMENT: /opt/venv
+      TZ: ${TZ:-Asia/Taipei}
+    ports:
+      - "${FLASK_TEST_BIND_HOST:-0.0.0.0}:${FLASK_TEST_PORT:-5012}:5000"
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace/python
+    command: uv run flask --app app.api:app run --host=0.0.0.0 --port=5000
+    networks:
+      - recipe-v11t2-net
+
+volumes:
+  recipe-v11t2-mysql-data:
+    name: recipe-v11t2-mysql-data
+
+networks:
+  recipe-v11t2-net:
+    name: recipe-v11t2-net
+    driver: bridge
