@@ -47,7 +47,7 @@ services:
       UV_PROJECT_ENVIRONMENT: /opt/venv
       TZ: ${TZ:-Asia/Taipei}
     ports:
-      - "${FLASK_TEST_BIND_HOST:-0.0.0.0}:${FLASK_TEST_PORT:-5013}:5001"
+      - "${FLASK_TEST_BIND_HOST:-0.0.0.0}:${FLASK_TEST_PORT:-5001}:5001"
     volumes:
       - ./:/workspace
     working_dir: /workspace/python

@@ -98,13 +98,13 @@ docker compose exec python-test \
 Health：
 
 ```bash
-curl http://localhost:5012/health
+curl http://localhost:5001/health
 ```
 
 食譜詳細資料：
 
 ```bash
-curl http://localhost:5012/api/v1/recipes/<SEQ>
+curl http://localhost:5001/api/v1/recipes/<SEQ>
 ```
 
 價格功能加入後，API 可包含：
@@ -122,7 +122,7 @@ curl http://localhost:5012/api/v1/recipes/<SEQ>
 
 ## 預設連線
 
-- Flask API：`localhost:5012`
+- Flask API：`localhost:5001`
 - MySQL Host：`127.0.0.1:3318`
 - Docker 內 MySQL：`mysql-test:3306`
 
