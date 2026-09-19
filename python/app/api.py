@@ -87,8 +87,6 @@ def _attach_categories(cur, items: list[dict]) -> list[dict]:
     for item in items:
         rid = item.get("id")
         item["categories"] = category_map.get(rid, [])
-        item["price_scope"] = "MAIN_INGREDIENTS_ONLY"
-        item["price_note"] = "不含調味料"
         item.pop("id", None)
 
     return items
@@ -371,8 +369,6 @@ def get_recipe(seq: str):
         category_holder = [{"id": recipe["id"]}]
         _attach_categories(cur, category_holder)
         recipe["categories"] = category_holder[0]["categories"]
-        recipe["price_scope"] = "MAIN_INGREDIENTS_ONLY"
-        recipe["price_note"] = "不含調味料"
 
     return jsonify(recipe)
 

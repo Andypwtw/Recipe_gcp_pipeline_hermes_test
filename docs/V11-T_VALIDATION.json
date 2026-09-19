@@ -1,0 +1,78 @@
+{
+  "version": "V11-T",
+  "base_formal_version": "V11",
+  "purpose": "JSON-only backend test version; not a formal release",
+  "architecture": [
+    "local JSON",
+    "clean/normalize ETL",
+    "MySQL",
+    "nutrition/weight/matching/calories",
+    "Flask API",
+    "Hermes API"
+  ],
+  "excluded": [
+    "Crawler",
+    "Proxy Manager/Workers",
+    "Kafka",
+    "Redpanda Console",
+    "MongoDB",
+    "Mongo Writer",
+    "Airflow",
+    "PostgreSQL",
+    "GCP production networking",
+    "Web frontend"
+  ],
+  "docker_services": [
+    "mysql-test",
+    "python-test"
+  ],
+  "data_validation": {
+    "raw_recipes": 29597,
+    "duplicate_groups": 2624,
+    "removed_duplicates": 5407,
+    "clean_recipes": 24190,
+    "normalized_recipes": 24190
+  },
+  "static_validation": {
+    "docker_compose_yaml": "PASS",
+    "python_syntax": "PASS (24 active Python files)",
+    "production_stack_directories_absent": "PASS",
+    "core_v11_files_sha256_unchanged": "PASS",
+    "core_file_checks": {
+      "python/scripts/03_normalize_recipes.py": true,
+      "python/scripts/04_import_recipes_mysql.py": true,
+      "python/scripts/04c_build_recipe_categories.py": true,
+      "python/scripts/04a_import_reference_maps.py": true,
+      "python/scripts/04b_apply_weight_estimates.py": true,
+      "python/scripts/05_import_nutrition_excel.py": true,
+      "python/scripts/06_match_ingredient_nutrition.py": true,
+      "python/scripts/07_auto_review_nutrition.py": true,
+      "python/scripts/08_apply_manual_review.py": true,
+      "python/scripts/09_calculate_recipe_nutrition.py": true,
+      "python/app/api.py": true,
+      "python/app/db.py": true,
+      "python/app/services/normalization.py": true,
+      "python/app/services/category_resolver.py": true,
+      "python/app/services/recommendation.py": true,
+      "mysql/init/001_schema.sql": true
+    },
+    "api_routes": [
+      "/api/v1/categories",
+      "/api/v1/categories/resolve",
+      "/api/v1/hermes/recommend",
+      "/api/v1/recipes",
+      "/api/v1/recipes/<seq>",
+      "/api/v1/recipes/random",
+      "/api/v1/recipes/search",
+      "/api/v1/recommend",
+      "/health"
+    ],
+    "json_pipeline_entry": "01_profile_raw_json.py"
+  },
+  "runtime_validation": {
+    "local_json_profile_clean_normalize": "PASS",
+    "docker_compose_build_up": "NOT RUN - Docker CLI/runtime not used in artifact environment",
+    "mysql_live_etl": "NOT RUN",
+    "flask_mysql_live_integration": "NOT RUN"
+  }
+}

@@ -99,19 +99,28 @@ def _build_recommendation_filters(
             if category_name not in text_ingredient_groups:
                 text_ingredient_groups.append(category_name)
 
-            # Ingredient-group intent (例如「我想吃雞肉」) is authoritative as
-            # an ingredient filter.  Do NOT also require recipe_categories here:
-            # category mappings can be incomplete and would incorrectly reduce
-            # valid ingredient matches to zero.
+            # When the normalized category exists, also require it.  This helps
+            # prefer the recipe's intended main ingredient instead of incidental
+            # traces of the requested meat.
+            category_id = row["category_id"]
+            if category_id not in category_ids:
+                category_ids.append(category_id)
             continue
 
         category_id = row["category_id"]
         if category_id not in category_ids:
             category_ids.append(category_id)
 
-    # Explicit ingredient groups (ingredients=["雞肉"]) are enforced only by
-    # recipe_ingredients.  They must not implicitly become mandatory category
-    # filters, otherwise incomplete recipe_categories mappings can return 0 rows.
+    # Explicit group names (ingredients=["雞肉"]) keep the same normalized
+    # category constraint when that alias exists.  Missing aliases do not block
+    # ingredient matching because the EXISTS condition below is authoritative.
+    explicit_group_names = [
+        name for name in explicit_ingredients if patterns_for_group(name)
+    ]
+    explicit_group_ids = resolve_explicit_category_ids(explicit_group_names)
+    for category_id in explicit_group_ids:
+        if category_id not in category_ids:
+            category_ids.append(category_id)
 
     explicit_ids = resolve_explicit_category_ids(categories or [])
     for category_id in explicit_ids:
@@ -205,9 +214,7 @@ def recommend_recipes(
             ROUND(rns.coverage_percent, 2) AS calorie_coverage_percent,
             ROUND(rns.price_coverage_percent, 2) AS price_coverage_percent,
             rns.calorie_status,
-            rns.price_status,
-            'MAIN_INGREDIENTS_ONLY' AS price_scope,
-            '不含調味料' AS price_note
+            rns.price_status
         FROM recipes r
         {' '.join(joins)}
         WHERE {where_sql}
@@ -282,9 +289,7 @@ def recommend_recipes_page(
             ROUND(rns.coverage_percent, 2) AS calorie_coverage_percent,
             ROUND(rns.price_coverage_percent, 2) AS price_coverage_percent,
             rns.calorie_status,
-            rns.price_status,
-            'MAIN_INGREDIENTS_ONLY' AS price_scope,
-            '不含調味料' AS price_note
+            rns.price_status
         FROM recipes r
         {' '.join(joins)}
         WHERE {where_sql}
