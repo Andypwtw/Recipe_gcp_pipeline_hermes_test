@@ -1,0 +1,35 @@
+{
+  "version": "V11-T-U-2",
+  "base_version": "V11-T-U",
+  "python_compileall": "PASS",
+  "tests": {
+    "status": "PASS",
+    "passed": 17,
+    "failed": 0,
+    "scope": [
+      "existing calorie/price calculation policy",
+      "fallback attempt limits",
+      "weighted ingredient matching",
+      "data-quality score excludes price",
+      "recommendation score excludes price/cooking-time/cache",
+      "conservative exclude and calorie intent parsing"
+    ]
+  },
+  "docker_compose_yaml": {
+    "modified": false,
+    "yaml_parse": "PASS",
+    "sha256_same_as_base": true
+  },
+  "runtime": {
+    "docker_stack": "NOT_RUN",
+    "mysql_integration": "NOT_RUN",
+    "reason": "Docker/MySQL runtime was not available in this artifact validation environment."
+  },
+  "explicitly_not_implemented": [
+    "budget recommendation",
+    "price sorting / PriceScore",
+    "cooking-time estimation",
+    "cache / Redis / in-memory cache",
+    "K-means clustering"
+  ]
+}

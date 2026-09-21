@@ -93,3 +93,49 @@ def detect_ingredient_groups(text: str) -> list[str]:
         return []
 
     return [group for group in INGREDIENT_GROUP_PATTERNS if group in query]
+
+
+def detect_excluded_ingredient_groups(text: str) -> list[str]:
+    """Detect explicit negative intent for supported ingredient groups only.
+
+    Conservative by design: it does not attempt arbitrary NLP extraction.
+    """
+    query = str(text or "").strip()
+    if not query:
+        return []
+
+    negative_prefixes = ("不要", "不吃", "不加", "去掉", "排除")
+    result: list[str] = []
+    for group in INGREDIENT_GROUP_PATTERNS:
+        if any(f"{prefix}{group}" in query for prefix in negative_prefixes):
+            result.append(group)
+    return result
+
+
+def detect_calorie_bounds(text: str) -> tuple[float | None, float | None]:
+    """Parse only explicit kcal/大卡 upper/lower bounds from natural language."""
+    import re
+
+    query = str(text or "")
+    if not query.strip():
+        return None, None
+
+    max_match = re.search(
+        r"(\d+(?:\.\d+)?)\s*(?:kcal|大卡|卡路里)\s*(?:以下|以內|內|不超過|最多)",
+        query,
+        flags=re.IGNORECASE,
+    )
+    min_match = re.search(
+        r"(\d+(?:\.\d+)?)\s*(?:kcal|大卡|卡路里)\s*(?:以上|至少|超過)",
+        query,
+        flags=re.IGNORECASE,
+    )
+    min_prefix_match = re.search(
+        r"(?:至少|超過)\s*(\d+(?:\.\d+)?)\s*(?:kcal|大卡|卡路里)",
+        query,
+        flags=re.IGNORECASE,
+    )
+
+    min_value = float((min_match or min_prefix_match).group(1)) if (min_match or min_prefix_match) else None
+    max_value = float(max_match.group(1)) if max_match else None
+    return min_value, max_value

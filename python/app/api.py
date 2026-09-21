@@ -6,9 +6,11 @@ import hmac
 
 from app.db import get_connection
 from app.services.category_resolver import resolve_categories_from_text
+from app.services.ingredient_intent import detect_calorie_bounds, detect_excluded_ingredient_groups
 from app.services.recommendation import (
     recommend_recipes,
     recommend_recipes_page,
+    recommend_recipes_with_metadata,
     resolve_explicit_category_ids,
 )
 
@@ -30,6 +32,18 @@ def _payload_string_list(value) -> list[str]:
 def _payload_text(payload: dict) -> str:
     """Accept both current `text` and legacy Hermes `message` payload keys."""
     return str(payload.get("text") or payload.get("message") or "").strip()
+
+
+
+
+def _payload_optional_float(payload: dict, key: str) -> float | None:
+    raw = payload.get(key)
+    if raw in (None, ""):
+        return None
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return None
 
 
 def _parse_positive_int(name: str, default: int, maximum: int | None = None) -> int:
@@ -425,7 +439,18 @@ def recommend_for_web():
     payload = request.get_json(silent=True) or {}
     text = _payload_text(payload)
     ingredients = _payload_string_list(payload.get("ingredients"))
+    required_ingredients = _payload_string_list(payload.get("required_ingredients"))
+    preferred_ingredients = _payload_string_list(payload.get("preferred_ingredients"))
+    exclude_ingredients = _payload_string_list(payload.get("exclude_ingredients"))
     categories = _payload_string_list(payload.get("categories"))
+    min_calories = _payload_optional_float(payload, "min_calories")
+    max_calories = _payload_optional_float(payload, "max_calories")
+    if not exclude_ingredients:
+        exclude_ingredients = detect_excluded_ingredient_groups(text)
+    if min_calories is None and max_calories is None:
+        detected_min, detected_max = detect_calorie_bounds(text)
+        min_calories = detected_min
+        max_calories = detected_max
 
     try:
         page = max(int(payload.get("page", 1)), 1)
@@ -442,6 +467,11 @@ def recommend_for_web():
         text=text,
         page=page,
         limit=limit,
+        required_ingredients=required_ingredients,
+        preferred_ingredients=preferred_ingredients,
+        exclude_ingredients=exclude_ingredients,
+        min_calories=min_calories,
+        max_calories=max_calories,
     )
 
     with get_connection() as conn, conn.cursor() as cur:
@@ -471,7 +501,18 @@ def recommend_for_hermes():
     payload = request.get_json(silent=True) or {}
     text = _payload_text(payload)
     ingredients = _payload_string_list(payload.get("ingredients"))
+    required_ingredients = _payload_string_list(payload.get("required_ingredients"))
+    preferred_ingredients = _payload_string_list(payload.get("preferred_ingredients"))
+    exclude_ingredients = _payload_string_list(payload.get("exclude_ingredients"))
     categories = _payload_string_list(payload.get("categories"))
+    min_calories = _payload_optional_float(payload, "min_calories")
+    max_calories = _payload_optional_float(payload, "max_calories")
+    if not exclude_ingredients:
+        exclude_ingredients = detect_excluded_ingredient_groups(text)
+    if min_calories is None and max_calories is None:
+        detected_min, detected_max = detect_calorie_bounds(text)
+        min_calories = detected_min
+        max_calories = detected_max
 
     try:
         limit = int(payload.get("limit", 10))
@@ -479,14 +520,17 @@ def recommend_for_hermes():
         limit = 10
 
     return jsonify(
-        {
-            "items": recommend_recipes(
-                ingredients=ingredients,
-                categories=categories,
-                text=text,
-                limit=limit,
-            )
-        }
+        recommend_recipes_with_metadata(
+            ingredients=ingredients,
+            required_ingredients=required_ingredients,
+            preferred_ingredients=preferred_ingredients,
+            exclude_ingredients=exclude_ingredients,
+            categories=categories,
+            text=text,
+            min_calories=min_calories,
+            max_calories=max_calories,
+            limit=limit,
+        )
     )
 
 if __name__ == "__main__":
